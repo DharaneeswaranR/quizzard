@@ -19,18 +19,29 @@ import figlet from 'figlet'
 import { createSpinner } from 'nanospinner'
 import getQuestions from './utils/getQuestions.js'
 
-let playerName
-let questions
+let playerName, questions, score = 0
 
 const sleep = (ms = 2000) => new Promise(r => setTimeout(r, ms))
 
 async function welcome() {
-    const rainbowTitle = chalkAnimation.rainbow("Are you a Quiz Wizzard?")
+    const rainbowTitle = chalkAnimation.rainbow("Are you a Quiz Wizzard?\n")
 
     await sleep()
     rainbowTitle.stop()
 
-    console.log(`${chalk.blue("HOW TO PLAY?")}\nChoose the right answer `)
+    console.log(`${chalk.blue("HOW TO PLAY?")}\nChoose the right answer\n`)
+}
+
+function congrats() {
+    console.clear()
+    const msg = `Congrats ${playerName}!`
+    
+    figlet(msg, (err, data) => {
+        console.log(gradient.pastel.multiline(data) + '\n')
+        console.log(chalk.green(`You scored ${score}/5`))
+
+        process.exit(0)
+    })
 }
 
 async function askName() {
@@ -52,10 +63,13 @@ async function handleAnswer(isCorrect) {
 
     if (isCorrect) {
         spinner.success({
-            text: `Well done ${playerName} 👏👏👏. That's a right answer`
+            text: `Well done ${playerName} 👏👏👏. That's a right answer\n`
         })
+        score++
     } else {
-        spinner.error("Oops 🤦‍♀️! That's a wrong answer")
+        spinner.error({
+            text: "Oops 🤦! That's a wrong answer\n"
+        })
     }
 }
 
@@ -72,7 +86,7 @@ async function question({ id, question, options, correct_answer }) {
     const answers = await inquirer.prompt({
         name: id,
         type: 'list',
-        message: `${question}\n`,
+        message: `${question}`,
         choices: options
     })
 
@@ -89,4 +103,5 @@ setQuestions()
 await welcome()
 await askName()
 await displayQuestions()
+congrats()
 // console.log(questions)
